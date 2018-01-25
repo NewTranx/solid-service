@@ -105,7 +105,6 @@ func (s *ServiceEndpoint) handleUpload(c *gin.Context) {
 			c.String(http.StatusInternalServerError, "unknown")
 		}
 	}
-	_ = baseName
 }
 
 func checkErr(err error) {
