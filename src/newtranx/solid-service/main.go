@@ -12,7 +12,9 @@ func main() {
 	flag.StringVar(&server.Host, "h", "", "host")
 	flag.IntVar(&server.Port, "p", 8080, "port")
 	flag.StringVar(&server.WorkPath, "w", ".", "work path")
+	flag.BoolVar(&server.Cleanup, "no-cleanup", false, "disable cleanup after conversion")
 	flag.Parse()
+	server.Cleanup = !server.Cleanup
 	initWorkPath(server.WorkPath)
 	server.Start()
 }

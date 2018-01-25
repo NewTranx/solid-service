@@ -27,6 +27,7 @@ type ServiceEndpoint struct {
 	Host     string
 	Port     int
 	WorkPath string
+	Cleanup  bool
 	srcPath  string
 	outPath  string
 	errPath  string
@@ -51,7 +52,9 @@ func (s *ServiceEndpoint) Start() {
 func (s *ServiceEndpoint) handleUpload(c *gin.Context) {
 	id, err := uuid.NewV4()
 	checkErr(err)
-	defer s.cleanup(id)
+	if s.Cleanup {
+		defer s.cleanup(id)
+	}
 	ctx, cancelCtx := newRequestContext(c, id)
 	defer cancelCtx()
 	log.Printf("<%s> begin", id.String())
@@ -74,14 +77,14 @@ func (s *ServiceEndpoint) handleUpload(c *gin.Context) {
 		return
 	}
 	log.Printf("<%s> saved to %s", id.String(), oneTimeFilePath)
-	err = waitForConversionDone(oneTimeFilePath, ctx)
+	err = waitForConversionDone(oneTimeFilePath)
+	select {
+	case <-ctx.Done():
+		return
+	default:
+	}
 	if err != nil {
-		select {
-		case <-ctx.Done():
-			// nothing
-		default:
-			c.String(http.StatusInternalServerError, err.Error())
-		}
+		c.String(http.StatusInternalServerError, err.Error())
 		return
 	}
 	log.Printf("<%s> conversion finished", id.String())
@@ -130,7 +133,7 @@ func saveUploadedFile(uploaded *multipart.FileHeader, dst string) error {
 	return nil
 }
 
-func waitForConversionDone(oneTimeFilePath string, ctx context.Context) error {
+func waitForConversionDone(oneTimeFilePath string) error {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return err
@@ -148,8 +151,6 @@ func waitForConversionDone(oneTimeFilePath string, ctx context.Context) error {
 			}
 		case err := <-watcher.Errors:
 			return err
-		case <-ctx.Done():
-			return fmt.Errorf("canceled")
 		}
 	}
 }
@@ -169,5 +170,7 @@ func newRequestContext(c *gin.Context, id *uuid.UUID) (context.Context, context.
 }
 
 func (s *ServiceEndpoint) cleanup(id *uuid.UUID) {
-	//TODO
+	log.Printf("<%s> cleanup", id.String())
+	outFilePath := s.outPath + "/" + id.String() + ".docx"
+	os.Remove(outFilePath)
 }
