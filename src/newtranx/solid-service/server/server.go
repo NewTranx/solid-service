@@ -27,7 +27,6 @@ type ServiceEndpoint struct {
 	Host     string
 	Port     int
 	WorkPath string
-	srv      *http.Server
 	srcPath  string
 	outPath  string
 	errPath  string
