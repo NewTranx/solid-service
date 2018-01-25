@@ -25,10 +25,18 @@
 #   unused-packages = true
 
 
+[[constraint]]
+  name = "github.com/gin-gonic/gin"
+  version = "1.2.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/nu7hatch/gouuid"
+
+[[constraint]]
+  version = "v1.4.7"
+  name = "github.com/fsnotify/fsnotify"
+
 [prune]
   go-tests = true
   unused-packages = true
-
-[[constraint]]
-  name = "github.com/gin-gonic/gin"
-  version = "0.5.0"
