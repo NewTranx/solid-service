@@ -11,7 +11,7 @@ func main() {
 	server := &server.ServiceEndpoint{}
 	flag.StringVar(&server.Host, "h", "", "host")
 	flag.IntVar(&server.Port, "p", 8080, "port")
-	flag.StringVar(&server.WorkPath, "w", "./work", "work path")
+	flag.StringVar(&server.WorkPath, "w", ".", "work path")
 	flag.Parse()
 	initWorkPath(server.WorkPath)
 	server.Start()
